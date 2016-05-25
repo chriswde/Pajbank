@@ -30,12 +30,14 @@ namespace Pajbank
 			this.WhisperConnection.OnWhispereReceive += this.whisperMessageTrigger;
 
 			//add commandhandlers (chat)
+			this.OnMessageReceive += this.printChatMessage;
 			this.OnMessageReceive += Twitch.Commands.CommanTestman.ChatResponse;
 			this.OnMessageReceive += Twitch.Commands.CommandBalance.ChatResponse;
 			this.OnMessageReceive += Twitch.Commands.CommandDeposit.ChatResponse;
 			this.OnMessageReceive += Twitch.Commands.CommandWithdraw.ChatResponse;
 
 			//add commandhandlers (whisper)
+			this.OnWhispereReceive += this.printWhisperMessage;
 			this.OnWhispereReceive += Twitch.Commands.CommandDeposit.WhisperResponse;
 			this.OnWhispereReceive += Twitch.Commands.CommanTestman.WhisperResponse;
 			this.OnWhispereReceive += Twitch.Commands.CommandWithdraw.WhisperResponse;
@@ -53,14 +55,14 @@ namespace Pajbank
 		}
 		#endregion
 
-		//"receive chat message respond with whisper"-commands
-		private void debugUserCommand(TwitchChatClient sender, Twitch.Messages.ChatMessage m)
+		private void printChatMessage(Bankbot sender, ChatMessage m)
 		{
-			if (m.Message.StartsWith("!pajbank debug") && m.IsMod)
-			{
-				Twitch.User u = Twitch.User.GetUserFromDataBase(m.Message.Split(' ')[2]);
-				this.WhisperConnection.SendWhisper(m.Username, u.Name + " has " + u.Balance + " points in his account.");
-			}
+			Console.WriteLine("{0}: {1}", m.Username, m.Message);
+		}
+
+		private void printWhisperMessage(Bankbot sender, WhisperMessage m)
+		{
+			Console.WriteLine("|w|{0}: {1}", m.Username, m.Message);
 		}
 	}
 }
