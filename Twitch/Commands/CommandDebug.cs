@@ -10,9 +10,9 @@ using Pajbank.Twitch.Messages;
 
 namespace Pajbank.Twitch.Commands
 {
-	class CommandBalance : Command
+	class CommandDebug : Command
 	{
-		public CommandBalance(Bankbot bot, uint cooldown)
+		public CommandDebug(Bankbot bot, uint cooldown)
 			: base(cooldown)
 		{
 			bot.OnMessageReceive += this.chatResponse;
@@ -23,12 +23,12 @@ namespace Pajbank.Twitch.Commands
 			if (!this.isOnCooldown())
 			{
 				List<string> args = GetArgs(m.Message);
-				if (args.Count >= 1)
+				if (args.Count >= 2)
 				{
-					if (args[0] == "balance")
+					if (args[0] == "debug" && m.IsMod)
 					{
-						User u = User.GetUserFromDataBase(m.Username);
-						sender.ChatConnection.SendChatMessage(m.Username + ", " + u.Balance + " points.");
+						User u = User.GetUserFromDataBase(args[1]);
+						sender.WhisperConnection.SendWhisper(m.Username, string.Format("Username: {0}; UserId: {1}; Balance: {2};", u.Name, u.Id, u.Balance));
 						this.lastExecution = DateTime.Now;
 					}
 				}

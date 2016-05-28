@@ -10,31 +10,32 @@ using Pajbank.Twitch.Messages;
 
 namespace Pajbank.Twitch.Commands
 {
-	class CommandDeposit
+	class CommandDeposit : Command
 	{
-		public static void ChatResponse(Bankbot sender, ChatMessage m)
+		public CommandDeposit(Bankbot bot, uint cooldown)
+			: base(cooldown)
 		{
-			if (m.Message.StartsWith("!pajbank deposit"))
-			{
-				//actual code
-				sender.ChatConnection.SendChatMessage(m.Username + ", please use the !givepoints command to deposit points.");
+			bot.OnMessageReceive += this.chatResponse;
+			bot.OnWhispereReceive += this.whisperResponse;
+		}
 
-				////Testing code
-				//long amount;
-				//if (long.TryParse(m.Message.Split(' ')[2], out amount))
-				//{
-				//	if (amount > 0)
-				//	{
-				//		User u = User.GetUserFromDataBase(m.Username);
-				//		u.Balance += amount;
-				//		u.Save();
-				//		sender.ChatConnection.SendChatMessage(m.Username + " successfully deposited " + amount + " points.");
-				//	}
-				//}
+		private void chatResponse(Bankbot sender, ChatMessage m)
+		{
+			if (!this.isOnCooldown())
+			{
+				List<string> args = GetArgs(m.Message);
+				if (args.Count >= 1)
+				{
+					if (args[0] == "deposit")
+					{
+						sender.ChatConnection.SendChatMessage(m.Username + ", please use the !givepoints command to deposit points.");
+						this.lastExecution = DateTime.Now;
+					}
+				}
 			}
 		}
 
-		public static void WhisperResponse(Bankbot sender, WhisperMessage m)
+		private void whisperResponse(Bankbot sender, WhisperMessage m)
 		{
 			//does the whisper come from pajbot?
 			if (m.Username == GlobalVars.Settings["masterchannelbot"])

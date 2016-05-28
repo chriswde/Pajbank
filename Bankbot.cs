@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Pajbank.Connection;
 using Pajbank.Twitch.Messages;
+using System.Timers;
 
 namespace Pajbank
 {
@@ -23,6 +24,7 @@ namespace Pajbank
 		public Bankbot(string ip, int port, string username, string password, string channelname)
 		{
 			this.ChatConnection = new TwitchChatClient(ip, port, username, password, channelname);
+			this.ChatConnection.Start();
 			this.WhisperConnection = new TwitchWhisperClient(ip, port, username, password);
 
 			//add triggers
@@ -30,23 +32,26 @@ namespace Pajbank
 			this.WhisperConnection.OnWhispereReceive += this.whisperMessageTrigger;
 
 			//add commandhandlers (chat)
-			this.OnMessageReceive += this.printChatMessage;
-			this.OnMessageReceive += Twitch.Commands.CommanTestman.ChatResponse;
-			this.OnMessageReceive += Twitch.Commands.CommandBalance.ChatResponse;
-			this.OnMessageReceive += Twitch.Commands.CommandDeposit.ChatResponse;
-			this.OnMessageReceive += Twitch.Commands.CommandWithdraw.ChatResponse;
+			this.ChatConnection.OnMessageReceive += this.printChatMessage;
+
+			Twitch.Commands.CommandAbout commandAbout = new Twitch.Commands.CommandAbout(this, 10);
+			Twitch.Commands.CommandBalance commandBalance = new Twitch.Commands.CommandBalance(this, 0);
+			Twitch.Commands.CommandDebug commandDebug = new Twitch.Commands.CommandDebug(this, 0);
+			Twitch.Commands.CommandDeposit commandDeposit = new Twitch.Commands.CommandDeposit(this, 10);
+			Twitch.Commands.CommandWithdraw commadWithdraw = new Twitch.Commands.CommandWithdraw(this, 0);
+			Twitch.Commands.CommandTestman commandTestman = new Twitch.Commands.CommandTestman(this, 0);
 
 			//add commandhandlers (whisper)
 			this.OnWhispereReceive += this.printWhisperMessage;
-			this.OnWhispereReceive += Twitch.Commands.CommandDeposit.WhisperResponse;
-			this.OnWhispereReceive += Twitch.Commands.CommanTestman.WhisperResponse;
-			this.OnWhispereReceive += Twitch.Commands.CommandWithdraw.WhisperResponse;
 		}
 
 		#region event triggers
 		private void chatMessageTrigger(TwitchChatClient sender, ChatMessage m)
 		{
-			this.OnMessageReceive(this, m);
+			if (m.Message.StartsWith("!" + GlobalVars.Settings["commandprefix"]))
+			{
+				this.OnMessageReceive(this, m);
+			}
 		}
 		
 		private void whisperMessageTrigger(TwitchWhisperClient sender, WhisperMessage m)
@@ -55,7 +60,7 @@ namespace Pajbank
 		}
 		#endregion
 
-		private void printChatMessage(Bankbot sender, ChatMessage m)
+		private void printChatMessage(object sender, ChatMessage m)
 		{
 			Console.WriteLine("{0}: {1}", m.Username, m.Message);
 		}

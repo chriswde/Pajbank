@@ -53,10 +53,13 @@
     <Compile Include="INIParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Twitch\Commands\Command.cs" />
+    <Compile Include="Twitch\Commands\CommandAbout.cs" />
     <Compile Include="Twitch\Commands\CommandBalance.cs" />
+    <Compile Include="Twitch\Commands\CommandDebug.cs" />
     <Compile Include="Twitch\Commands\CommandDeposit.cs" />
     <Compile Include="Twitch\Commands\CommandWithdraw.cs" />
-    <Compile Include="Twitch\Commands\CommanTestman.cs" />
+    <Compile Include="Twitch\Commands\CommandTestman.cs" />
     <Compile Include="Twitch\Messages\ChatMessage.cs" />
     <Compile Include="Twitch\Messages\TwitchMessage.cs" />
     <Compile Include="Twitch\Messages\WhisperMessage.cs" />

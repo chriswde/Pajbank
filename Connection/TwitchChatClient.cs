@@ -14,6 +14,7 @@ namespace Pajbank.Connection
 		public delegate void MessageReceive(TwitchChatClient sender, ChatMessage chatMessage);
 		public event MessageReceive OnMessageReceive;
 		private string channel;
+		private bool alternating = false; //used for adding random shit at the and of the message to get around the 30second ban for identical messages
 		private Thread ChatListenerThread;
 
 		public TwitchChatClient(string ip, int port, string username, string password, string channelname)
@@ -24,6 +25,10 @@ namespace Pajbank.Connection
 			this.joinRoom(this.channel);
 			this.ChatListenerThread = new Thread(new ThreadStart(this.chatWorker));
 			this.ChatListenerThread.IsBackground = true;
+		}
+
+		public void Start()
+		{
 			this.ChatListenerThread.Start();
 		}
 
@@ -65,9 +70,28 @@ namespace Pajbank.Connection
 		/// Sends Twitchchat message
 		/// </summary>
 		/// <param name="message">Chatmessage</param>
-		public void SendChatMessage(string message)
+		public async void SendChatMessage(string message)
 		{
+			//adding random shit
+			string shit = " ­";
+			if (this.alternating)
+			{
+				message += shit;
+			}
+
+			//check if the bot already sent a mesage in the last 1.5 seconds to prevent a global ban
+			TimeSpan span = DateTime.Now - this.lastMessageTime;
+			while (span.TotalMilliseconds < 1450)
+			{
+				await Task.Delay(100);
+				span = DateTime.Now - this.lastMessageTime;
+			}
+
+			this.alternating = !this.alternating;
 			this.sendIrcMessage(@":" + username + "!" + username + "@" + username + "tmi.twitch.tv PRIVMSG #" + channel + " :" + message);
+
+			//set the time of the last sent chat message to current time
+			this.lastMessageTime = DateTime.Now;
 		}
 
 		/// <summary>
@@ -77,19 +101,9 @@ namespace Pajbank.Connection
 		/// <param name="delay">Delay in seconds</param>
 		public async void SendChatMessage(string msg, uint delay = 0)
 		{
-			//check if the bot already sent a mesage in the last 1.45 seconds
-			TimeSpan span = DateTime.Now - this.lastMessageTime;
-			while (span.TotalMilliseconds < 1450)
-			{
-				await Task.Delay(100);
-				span = DateTime.Now - this.lastMessageTime;
-			}
-
 			//wait if a delay is specified
 			await Task.Delay((int)delay * 1000);
 
-			//set the time of the last sent chat message to current time
-			this.lastMessageTime = DateTime.Now;
 			this.SendChatMessage(msg);
 		}
 		#endregion

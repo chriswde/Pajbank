@@ -5,14 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Pajbank.Connection;
-using Pajbank.Twitch;
 using Pajbank.Twitch.Messages;
 
 namespace Pajbank.Twitch.Commands
 {
-	class CommandBalance : Command
+	class CommandAbout : Command
 	{
-		public CommandBalance(Bankbot bot, uint cooldown)
+		public CommandAbout(Bankbot bot, uint cooldown)
 			: base(cooldown)
 		{
 			bot.OnMessageReceive += this.chatResponse;
@@ -22,13 +21,12 @@ namespace Pajbank.Twitch.Commands
 		{
 			if (!this.isOnCooldown())
 			{
-				List<string> args = GetArgs(m.Message);
+				List<string> args = this.GetArgs(m.Message);
 				if (args.Count >= 1)
 				{
-					if (args[0] == "balance")
+					if (args[0] == "about")
 					{
-						User u = User.GetUserFromDataBase(m.Username);
-						sender.ChatConnection.SendChatMessage(m.Username + ", " + u.Balance + " points.");
+						sender.ChatConnection.SendChatMessage("/me Pajbank is an automated bankbot coded in c#. The source code is available on github: https://github.com/chriswde/Pajbank");
 						this.lastExecution = DateTime.Now;
 					}
 				}
